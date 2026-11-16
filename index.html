@@ -320,6 +320,15 @@ function place(r,c){
 
  render();
 
+// 置いたブロックを派手に光らせる！
+const placedCells=[...boardEl.children];
+p.shape.forEach(([dr,dc])=>{
+ placedCells[(r+dr)*SIZE+(c+dc)]?.classList.add("placed");
+});
+boardEl.classList.remove("impact");
+void boardEl.offsetWidth;
+boardEl.classList.add("impact");
+
  if(lines.rows.length||lines.cols.length){
   animating=true;
 
