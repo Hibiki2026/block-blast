@@ -7,415 +7,213 @@
 <title>BLOCK BLAST!</title>
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;min-height:100vh;padding:20px 12px;
- font-family:system-ui,sans-serif;color:white;text-align:center;
- background:linear-gradient(145deg,#17134b,#312477,#126c91);
-}
-h1{
- font-size:clamp(32px,8vw,48px);margin:8px 0;
- text-shadow:0 4px 15px #00d9ff;
-}
-.subtitle{color:#c8d9ff;margin-bottom:20px}
-.stats{display:flex;justify-content:center;gap:12px;margin:15px auto}
-.stat{
- background:#ffffff18;border:1px solid #ffffff35;
- border-radius:14px;padding:10px 22px;min-width:110px;
-}
-.stat small{display:block;color:#bcd5ff}
+body{margin:0;min-height:100vh;padding:18px 12px 30px;font-family:system-ui,sans-serif;color:#fff;text-align:center;background:radial-gradient(circle at 50% 0%,#42318c 0,#211b58 42%,#101b3c 100%)}
+h1{font-size:clamp(32px,8vw,48px);margin:8px 0;text-shadow:0 4px 18px #00d9ff}
+.subtitle{color:#d2dcff;margin-bottom:18px}
+.stats{display:flex;justify-content:center;gap:12px;margin:14px auto}
+.stat{background:#ffffff18;border:1px solid #ffffff35;border-radius:14px;padding:9px 22px;min-width:110px;box-shadow:0 5px 18px #0002}
+.stat small{display:block;color:#c5d7ff}
 .stat strong{font-size:25px}
-
-#board{
- width:min(92vw,440px);aspect-ratio:1;margin:15px auto;
- display:grid;grid-template-columns:repeat(8,1fr);
- gap:4px;padding:7px;border-radius:14px;
- background:#101536;box-shadow:0 12px 35px #0006;
-}
-.cell{border-radius:5px;background:#ffffff13;min-width:0}
-.cell.filled{
-/* ブロックを置いた瞬間のド派手エフェクト */
-.cell.placed{
- position:relative;
- z-index:3;
- animation:place-burst .48s cubic-bezier(.16,1.4,.4,1) both;
-}
-.cell.placed::after{
- content:"✦";
- position:absolute;
- inset:-5px;
- display:grid;
- place-items:center;
- color:#fff;
- font-size:22px;
- text-shadow:0 0 5px #fff,0 0 12px #fff36b,0 0 22px #ff4dca;
- pointer-events:none;
- animation:place-star .48s ease-out both;
-}
-#board.impact{animation:board-impact .32s ease-out}
-@keyframes place-burst{
- 0%{transform:scale(.35) rotate(-12deg);filter:brightness(3)}
- 55%{transform:scale(1.28) rotate(4deg);filter:brightness(2.2);box-shadow:0 0 18px 7px #fff9,0 0 30px 12px #ff6bd6}
- 100%{transform:scale(1) rotate(0);filter:brightness(1)}
-}
-@keyframes place-star{
- 0%{opacity:0;transform:scale(.2) rotate(-45deg)}
- 35%{opacity:1;transform:scale(1.7) rotate(35deg)}
- 100%{opacity:0;transform:scale(.25) rotate(100deg)}
-}
-@keyframes board-impact{
- 0%{filter:brightness(1)}
- 35%{filter:brightness(1.65) drop-shadow(0 0 12px #ffe66d)}
- 100%{filter:brightness(1)}
-}
-
- box-shadow:inset 0 2px 5px #ffffff55,0 2px 4px #0004;
-}
-
-/* キラキラ消去アニメーション */
-.cell.clearing{
- position:relative;
- z-index:2;
- animation:pop-clear .5s cubic-bezier(.2,.8,.3,1) forwards;
-}
-.cell.clearing::after{
- content:"✦";
- position:absolute;
- inset:0;
- display:grid;
- place-items:center;
- color:white;
- font-size:clamp(12px,3vw,22px);
- text-shadow:0 0 8px white,0 0 16px #ffe66d;
- animation:sparkle .5s ease-out forwards;
- pointer-events:none;
-}
-@keyframes pop-clear{
- 0%{transform:scale(1);filter:brightness(1)}
- 30%{
-  transform:scale(1.2);
-  filter:brightness(2.5);
-  box-shadow:0 0 14px 5px white,0 0 28px 10px #ffe66d;
- }
- 100%{
-  transform:scale(.05) rotate(18deg);
-  opacity:0;
-  filter:brightness(2);
- }
-}
-@keyframes sparkle{
- 0%{opacity:0;transform:scale(.3) rotate(0)}
- 30%{opacity:1;transform:scale(1.5) rotate(90deg)}
- 100%{opacity:0;transform:scale(.2) rotate(180deg)}
-}
-
-#pieces{
- display:flex;justify-content:center;gap:12px;
- margin:20px auto;min-height:105px;flex-wrap:wrap;
-}
-.piece{
- width:105px;height:100px;border:2px solid #ffffff30;
- border-radius:13px;background:#ffffff13;display:flex;
- align-items:center;justify-content:center;cursor:pointer;
- transition:transform .15s,background .15s;
-}
-.piece.selected{
- border-color:#fff;background:#ffffff35;
- transform:translateY(-5px);
-}
+#board{width:min(92vw,440px);aspect-ratio:1;margin:15px auto;display:grid;grid-template-columns:repeat(8,1fr);gap:4px;padding:7px;border-radius:16px;background:#0b1230;box-shadow:0 12px 35px #0008;touch-action:manipulation}
+.cell{position:relative;border-radius:5px;background:#ffffff13;min-width:0;min-height:0}
+.cell.filled{box-shadow:inset 0 2px 5px #ffffff55,0 2px 4px #0005}
+.cell.placed{z-index:3;animation:place-burst .5s cubic-bezier(.16,1.4,.4,1) both}
+.cell.placed:after{content:"✦";position:absolute;inset:-5px;display:grid;place-items:center;color:#fff;font-size:clamp(14px,4vw,23px);text-shadow:0 0 5px #fff,0 0 12px #fff36b,0 0 22px #ff4dca;pointer-events:none;animation:place-star .5s ease-out both}
+#board.impact{animation:board-impact .34s ease-out}
+@keyframes place-burst{0%{transform:scale(.3) rotate(-14deg);filter:brightness(3)}55%{transform:scale(1.25) rotate(4deg);filter:brightness(2.3);box-shadow:0 0 18px 7px #fff9,0 0 30px 12px #ff6bd6}100%{transform:scale(1) rotate(0);filter:brightness(1)}}
+@keyframes place-star{0%{opacity:0;transform:scale(.2) rotate(-45deg)}35%{opacity:1;transform:scale(1.7) rotate(35deg)}100%{opacity:0;transform:scale(.2) rotate(100deg)}}
+@keyframes board-impact{0%{filter:brightness(1)}35%{filter:brightness(1.7) drop-shadow(0 0 13px #ffe66d)}100%{filter:brightness(1)}}
+.cell.clearing{z-index:4;animation:pop-clear .5s cubic-bezier(.2,.8,.3,1) forwards}
+.cell.clearing:after{content:"✦";position:absolute;inset:0;display:grid;place-items:center;color:white;font-size:clamp(12px,3vw,22px);text-shadow:0 0 8px white,0 0 16px #ffe66d;animation:sparkle .5s ease-out forwards;pointer-events:none}
+@keyframes pop-clear{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(2.5);box-shadow:0 0 14px 5px white,0 0 28px 10px #ffe66d}100%{transform:scale(.05) rotate(18deg);opacity:0;filter:brightness(2)}}
+@keyframes sparkle{0%{opacity:0;transform:scale(.3) rotate(0)}30%{opacity:1;transform:scale(1.5) rotate(90deg)}100%{opacity:0;transform:scale(.2) rotate(180deg)}}
+#message{min-height:28px;color:#ffe58a;margin:8px 0}
+#pieces{display:flex;justify-content:center;gap:12px;margin:16px auto;min-height:105px;flex-wrap:wrap}
+.piece{width:105px;height:100px;border:2px solid #ffffff30;border-radius:13px;background:#ffffff13;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s,background .15s}
+.piece.selected{border-color:#fff;background:#ffffff35;transform:translateY(-5px);box-shadow:0 0 18px #8deaff88}
+.piece:active{transform:scale(.96)}
 .shape{display:grid;gap:3px}
 .mini{width:19px;height:19px;border-radius:4px}
-button{
- border:0;border-radius:12px;padding:12px 24px;
- background:linear-gradient(90deg,#ff4d9d,#ff9c40);
- color:white;font-size:16px;font-weight:bold;cursor:pointer;
-}
-button:active,.piece:active{transform:scale(.96)}
-#message{min-height:28px;color:#ffe58a}
+.controls{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin:12px auto}
+button{border:0;border-radius:12px;padding:12px 20px;background:linear-gradient(90deg,#ff4d9d,#ff9c40);color:white;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 5px 15px #0003}
+button:active{transform:scale(.96)}
+#holdButton{background:linear-gradient(90deg,#2689ff,#8a5cff)}
+#holdButton:disabled{opacity:.45;cursor:not-allowed}
+.hold-panel{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px auto 6px;padding:10px 15px;width:min(92vw,330px);border:1px solid #ffffff35;border-radius:14px;background:#ffffff12}
+#holdPreview{width:92px;min-height:48px;display:flex;align-items:center;justify-content:center}
+#holdPreview .mini{width:15px;height:15px}
+.hold-info{text-align:left;font-size:13px;color:#d7e2ff}
+.hold-info strong{display:block;font-size:17px;color:#fff}
+@media(max-width:380px){.piece{width:90px;height:88px}.mini{width:17px;height:17px}#board{gap:3px;padding:6px}}
 </style>
 </head>
 <body>
-
 <h1>🧱 BLOCK BLAST!</h1>
 <div class="subtitle">ブロックを置いてラインを消そう！</div>
-
 <div class="stats">
- <div class="stat">
-  <small>SCORE</small>
-  <strong id="score">0</strong>
- </div>
- <div class="stat">
-  <small>BEST</small>
-  <strong id="best">0</strong>
- </div>
+ <div class="stat"><small>SCORE</small><strong id="score">0</strong></div>
+ <div class="stat"><small>BEST</small><strong id="best">0</strong></div>
 </div>
-
 <div id="board"></div>
 <div id="message">ブロックを選んで、盤面をタップ！</div>
 <div id="pieces"></div>
-
-<button onclick="restart()">🔄 もう一度遊ぶ</button>
-
+<div class="hold-panel">
+ <div id="holdPreview">空っぽ</div>
+ <div class="hold-info"><strong>📦 保留スペース</strong><span>残り <b id="holdCount">1</b> 回</span><br><span>10,000点ごとに +1回</span></div>
+</div>
+<div class="controls">
+ <button id="holdButton" onclick="useHold()">📦 保留する</button>
+ <button onclick="restart()">🔄 もう一度遊ぶ</button>
+</div>
 <script>
 const SIZE=8;
-
-const colors=[
- "#ff5277","#ffae42","#41d9ad",
- "#42a5ff","#bd75ff","#ffe45e"
-];
-
+const colors=["#ff5277","#ffae42","#41d9ad","#42a5ff","#bd75ff","#ffe45e"];
 const shapes=[
- [[0,0]],
- [[0,0],[0,1]],
- [[0,0],[0,1],[0,2]],
- [[0,0],[1,0],[1,1]],
- [[0,0],[1,0],[2,0],[2,1]],
- [[0,0],[1,0],[0,1],[1,1]],
- [[0,0],[0,1],[0,2],[1,1]],
- [[0,0],[1,0],[2,0]],
- [[0,0],[1,0],[2,0],[3,0]],
- [[0,0],[0,1],[0,2],[0,3]],
- [[0,0],[1,0],[2,0],[1,1],[1,2]],
+ [[0,0]],[[0,0],[0,1]],[[0,0],[0,1],[0,2]],
+ [[0,0],[1,0],[1,1]],[[0,0],[1,0],[2,0],[2,1]],
+ [[0,0],[1,0],[0,1],[1,1]],[[0,0],[0,1],[0,2],[1,1]],
+ [[0,0],[1,0],[2,0]],[[0,0],[1,0],[2,0],[3,0]],
+ [[0,0],[0,1],[0,2],[0,3]],[[0,0],[1,0],[2,0],[1,1],[1,2]],
  [[0,0],[1,0],[2,0],[2,1],[2,2]]
 ];
-
-let board,score,best,hand,selected,gameOver;
-let animating=false;
-
+let board,score,best,hand,selected,gameOver,animating,heldPiece,holdUses,holdMilestones;
 const boardEl=document.getElementById("board");
 const piecesEl=document.getElementById("pieces");
 
 function restart(){
- board=Array.from(
-  {length:SIZE},
-  ()=>Array(SIZE).fill(null)
- );
- score=0;
- hand=[];
- selected=-1;
- gameOver=false;
- animating=false;
-
- best=Number(
-  localStorage.getItem("blockBlastBest")||0
- );
-
- newHand();
- render();
+ board=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
+ score=0;hand=[];selected=-1;gameOver=false;animating=false;
+ heldPiece=null;holdUses=1;holdMilestones=0;
+ best=Number(localStorage.getItem("blockBlastBest")||0);
+ newHand();render();
 }
+function randomPiece(){return {shape:shapes[Math.floor(Math.random()*shapes.length)],color:colors[Math.floor(Math.random()*colors.length)]};}
+function newHand(){hand=[randomPiece(),randomPiece(),randomPiece()];selected=-1;}
 
-function randomPiece(){
- return {
-  shape:shapes[Math.floor(Math.random()*shapes.length)],
-  color:colors[Math.floor(Math.random()*colors.length)]
- };
-}
-
-function newHand(){
- hand=[
-  randomPiece(),
-  randomPiece(),
-  randomPiece()
- ];
- selected=-1;
+function drawMini(p,target){
+ target.innerHTML="";
+ if(!p){target.textContent="空っぽ";return;}
+ const maxR=Math.max(...p.shape.map(x=>x[0]))+1,maxC=Math.max(...p.shape.map(x=>x[1]))+1;
+ const grid=document.createElement("div");grid.className="shape";grid.style.gridTemplateColumns="repeat("+maxC+",15px)";
+ for(let r=0;r<maxR;r++)for(let c=0;c<maxC;c++){
+  const cell=document.createElement("div");cell.className="mini";
+  if(p.shape.some(x=>x[0]===r&&x[1]===c))cell.style.background=p.color;
+  grid.appendChild(cell);
+ }
+ target.appendChild(grid);
 }
 
 function render(){
  document.getElementById("score").textContent=score;
  document.getElementById("best").textContent=best;
-
+ document.getElementById("holdCount").textContent=holdUses;
+ document.getElementById("holdButton").disabled=gameOver||animating||selected<0||holdUses<=0;
+ drawMini(heldPiece,document.getElementById("holdPreview"));
  boardEl.innerHTML="";
-
- for(let r=0;r<SIZE;r++){
-  for(let c=0;c<SIZE;c++){
-   const el=document.createElement("div");
-   el.className="cell"+(board[r][c]?" filled":"");
-
-   if(board[r][c]){
-    el.style.background=board[r][c];
-   }
-
-   el.onclick=()=>place(r,c);
-   boardEl.appendChild(el);
-  }
+ for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+  const el=document.createElement("div");el.className="cell"+(board[r][c]?" filled":"");
+  if(board[r][c])el.style.background=board[r][c];
+  el.onclick=()=>place(r,c);boardEl.appendChild(el);
  }
-
  piecesEl.innerHTML="";
-
  hand.forEach((p,i)=>{
-  const box=document.createElement("div");
-  box.className="piece"+(selected===i?" selected":"");
-
-  if(!p){
-   box.style.opacity=".15";
-   piecesEl.appendChild(box);
-   return;
+  const box=document.createElement("div");box.className="piece"+(selected===i?" selected":"");
+  if(!p){box.style.opacity=".15";piecesEl.appendChild(box);return;}
+  const maxR=Math.max(...p.shape.map(x=>x[0]))+1,maxC=Math.max(...p.shape.map(x=>x[1]))+1;
+  const grid=document.createElement("div");grid.className="shape";grid.style.gridTemplateColumns="repeat("+maxC+",19px)";
+  for(let r=0;r<maxR;r++)for(let c=0;c<maxC;c++){
+   const cell=document.createElement("div");cell.className="mini";
+   if(p.shape.some(x=>x[0]===r&&x[1]===c))cell.style.background=p.color;
+   grid.appendChild(cell);
   }
-
-  const maxR=Math.max(...p.shape.map(x=>x[0]))+1;
-  const maxC=Math.max(...p.shape.map(x=>x[1]))+1;
-
-  const grid=document.createElement("div");
-  grid.className="shape";
-  grid.style.gridTemplateColumns=`repeat(${maxC},19px)`;
-
-  for(let r=0;r<maxR;r++){
-   for(let c=0;c<maxC;c++){
-    const cell=document.createElement("div");
-    cell.className="mini";
-
-    if(p.shape.some(x=>x[0]===r&&x[1]===c)){
-     cell.style.background=p.color;
-    }
-
-    grid.appendChild(cell);
-   }
-  }
-
-  box.appendChild(grid);
-  box.onclick=()=>{
-   if(animating)return;
-   selected=i;
-   render();
-  };
-
+  box.appendChild(grid);box.onclick=()=>{if(animating||gameOver)return;selected=i;render();};
   piecesEl.appendChild(box);
  });
-
- document.getElementById("message").textContent=
-  gameOver?"ゲームオーバー！もう一度遊ぼう！":
-  animating?"✨ キラキラ消去中！":
-  selected>=0?"盤面の置きたい場所をタップ！":
-  "ブロックを選んでね！";
+ document.getElementById("message").textContent=gameOver?"ゲームオーバー！もう一度遊ぼう！":animating?"✨ キラキラ消去中！":selected>=0?"盤面の置きたい場所をタップ！":"ブロックを選んでね！";
 }
 
 function canPlace(shape,r,c){
  return shape.every(([dr,dc])=>{
-  let y=r+dr;
-  let x=c+dc;
-
-  return y>=0&&y<SIZE&&
-         x>=0&&x<SIZE&&
-         !board[y][x];
+  const y=r+dr,x=c+dc;
+  return y>=0&&y<SIZE&&x>=0&&x<SIZE&&!board[y][x];
  });
 }
 
-function place(r,c){
- if(gameOver||animating||selected<0||!hand[selected]){
-  return;
+function addScore(points){
+ score+=points;
+ const reached=Math.floor(score/10000);
+ if(reached>holdMilestones){
+  holdUses+=reached-holdMilestones;
+  holdMilestones=reached;
  }
+}
 
+function useHold(){
+ if(gameOver||animating||selected<0||!hand[selected]||holdUses<=0)return;
+ const current=hand[selected];
+ if(heldPiece===null){
+  heldPiece=current;
+  hand[selected]=randomPiece();
+ }else{
+  hand[selected]=heldPiece;
+  heldPiece=current;
+ }
+ holdUses--;selected=-1;render();
+ document.getElementById("message").textContent="📦 ブロックを保留したよ！";
+}
+
+function place(r,c){
+ if(gameOver||animating||selected<0||!hand[selected])return;
  const p=hand[selected];
-
  if(!canPlace(p.shape,r,c))return;
-
- p.shape.forEach(([dr,dc])=>{
-  board[r+dr][c+dc]=p.color;
- });
-
- score+=p.shape.length;
- hand[selected]=null;
- selected=-1;
-
+ p.shape.forEach(([dr,dc])=>board[r+dr][c+dc]=p.color);
+ addScore(p.shape.length);
+ hand[selected]=null;selected=-1;
  const lines=findLines();
-
  render();
 
-// 置いたブロックを派手に光らせる！
-const placedCells=[...boardEl.children];
-p.shape.forEach(([dr,dc])=>{
- placedCells[(r+dr)*SIZE+(c+dc)]?.classList.add("placed");
-});
-boardEl.classList.remove("impact");
-void boardEl.offsetWidth;
-boardEl.classList.add("impact");
+ const placedCells=[...boardEl.children];
+ p.shape.forEach(([dr,dc])=>placedCells[(r+dr)*SIZE+(c+dc)]?.classList.add("placed"));
+ boardEl.classList.remove("impact");
+ void boardEl.offsetWidth;
+ boardEl.classList.add("impact");
 
  if(lines.rows.length||lines.cols.length){
   animating=true;
-
   const cells=[...boardEl.children];
-
-  for(let r of lines.rows){
-   for(let c=0;c<SIZE;c++){
-    cells[r*SIZE+c].classList.add("clearing");
-   }
-  }
-
-  for(let c of lines.cols){
-   for(let r=0;r<SIZE;r++){
-    cells[r*SIZE+c].classList.add("clearing");
-   }
-  }
-
+  for(const row of lines.rows)for(let c=0;c<SIZE;c++)cells[row*SIZE+c].classList.add("clearing");
+  for(const col of lines.cols)for(let r=0;r<SIZE;r++)cells[r*SIZE+col].classList.add("clearing");
   setTimeout(()=>{
-   for(let r of lines.rows){
-    for(let c=0;c<SIZE;c++){
-     board[r][c]=null;
-    }
-   }
-
-   for(let c of lines.cols){
-    for(let r=0;r<SIZE;r++){
-     board[r][c]=null;
-    }
-   }
-
-   score+=(lines.rows.length+lines.cols.length)*SIZE*10;
-
-   animating=false;
-   finishTurn();
+   for(const row of lines.rows)for(let c=0;c<SIZE;c++)board[row][c]=null;
+   for(const col of lines.cols)for(let r=0;r<SIZE;r++)board[r][col]=null;
+   addScore((lines.rows.length+lines.cols.length)*SIZE*10);
+   animating=false;finishTurn();
   },520);
-
  }else{
-  finishTurn();
+  animating=true;
+  setTimeout(()=>{animating=false;finishTurn();},520);
  }
 }
 
 function findLines(){
- let rows=[];
- let cols=[];
-
- for(let r=0;r<SIZE;r++){
-  if(board[r].every(Boolean)){
-   rows.push(r);
-  }
- }
-
- for(let c=0;c<SIZE;c++){
-  if(board.every(row=>row[c])){
-   cols.push(c);
-  }
- }
-
+ const rows=[],cols=[];
+ for(let r=0;r<SIZE;r++)if(board[r].every(Boolean))rows.push(r);
+ for(let c=0;c<SIZE;c++)if(board.every(row=>row[c]))cols.push(c);
  return {rows,cols};
 }
 
 function finishTurn(){
  best=Math.max(best,score);
-
  localStorage.setItem("blockBlastBest",best);
-
- if(hand.every(x=>!x)){
-  newHand();
- }
-
- if(!hand.some(p=>p&&hasMove(p))){
-  gameOver=true;
- }
-
+ if(hand.every(x=>!x))newHand();
+ if(!hand.some(p=>p&&hasMove(p)))gameOver=true;
  render();
 }
 
 function hasMove(p){
- for(let r=0;r<SIZE;r++){
-  for(let c=0;c<SIZE;c++){
-   if(canPlace(p.shape,r,c)){
-    return true;
-   }
-  }
- }
+ for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(canPlace(p.shape,r,c))return true;
  return false;
 }
-
 restart();
 </script>
 </body>
