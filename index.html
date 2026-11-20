@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>BLOCK BLAST!</title>
 <style>
 *{box-sizing:border-box}
@@ -22,11 +22,11 @@ h1{font-size:clamp(28px,7vw,42px);margin:5px;text-shadow:0 0 20px #48cfff}
 .cell.invalid{background:#ff476e66!important;outline:2px solid #ff708a}
 .cell.line-preview{filter:brightness(1.7)}
 .cell.placed{animation:place .3s cubic-bezier(.2,1.7,.4,1)}
-.cell.clearing{z-index:3;animation:clear .75s cubic-bezier(.2,.8,.2,1) forwards}
+.cell.clearing{z-index:3;animation:clear .75s ease-in forwards}
 .cell.clearing:after{content:"✦";position:absolute;inset:0;display:grid;place-items:center;color:white;font-size:22px;animation:star .65s ease-out}
 @keyframes place{0%{transform:scale(.3);filter:brightness(3)}70%{transform:scale(1.18)}100%{transform:scale(1)}}
-@keyframes clear{0%{transform:scale(1);filter:brightness(1)}20%{transform:scale(1.2);filter:brightness(3);box-shadow:0 0 25px #fff,0 0 45px #ffe45e}55%{transform:scale(.9) rotate(12deg);filter:brightness(2)}100%{transform:scale(.05) rotate(100deg);opacity:0}}
-@keyframes star{0%{transform:scale(.2) rotate(0);opacity:0}35%{transform:scale(1.8) rotate(90deg);opacity:1}100%{transform:scale(.1) rotate(180deg);opacity:0}}
+@keyframes clear{0%{transform:scale(1)}20%{transform:scale(1.2);filter:brightness(3);box-shadow:0 0 25px #fff,0 0 45px #ffe45e}55%{transform:scale(.9) rotate(12deg)}100%{transform:scale(.05) rotate(100deg);opacity:0}}
+@keyframes star{0%{transform:scale(.2);opacity:0}35%{transform:scale(1.8) rotate(90deg);opacity:1}100%{transform:scale(.1) rotate(180deg);opacity:0}}
 #board.impact{animation:impact .38s ease-out}
 @keyframes impact{30%{filter:brightness(1.7);transform:scale(1.012)}100%{filter:brightness(1);transform:scale(1)}}
 #message{min-height:46px;display:grid;place-items:center;margin:8px 0;color:#ffe58a;font-size:14px}
@@ -39,15 +39,15 @@ h1{font-size:clamp(28px,7vw,42px);margin:5px;text-shadow:0 0 20px #48cfff}
 .hold-panel{padding:10px;border:1px solid #ffffff30;border-radius:14px;background:#ffffff10;margin-top:8px}
 .hold-heading{font-weight:800;margin-bottom:8px}
 #holdSlots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.hold-slot{min-height:65px;border:2px dashed #ffffff55;border-radius:10px;background:#101b3c88;display:flex;align-items:center;justify-content:center;touch-action:none}
+.hold-slot{min-height:76px;border:2px dashed #ffffff55;border-radius:10px;background:#101b3c88;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;touch-action:none}
 .hold-slot.occupied{border-style:solid;border-color:#8ddcff;background:#ffffff16}
 .hold-slot.selected{outline:2px solid #ffe45e}
 .hold-slot .shape{gap:2px}
 .hold-slot .mini{width:13px!important;height:13px!important}
+.return-btn{border:0;border-radius:7px;background:#398bdc;color:white;font-size:10px;padding:4px 7px;cursor:pointer}
 .hold-caption{font-size:11px;color:#cbd7fa;margin-top:7px}
 .controls{display:flex;gap:10px;margin:14px 0}
-.controls button{flex:1;border:0;border-radius:12px;padding:13px 8px;color:white;background:linear-gradient(100deg,#ff4d9d,#ff9c40);font-size:15px;font-weight:700}
-#restartButton{background:linear-gradient(100deg,#2689ff,#8a5cff)}
+.controls button{flex:1;border:0;border-radius:12px;padding:13px 8px;color:white;background:linear-gradient(100deg,#2689ff,#8a5cff);font-size:15px;font-weight:700}
 #dragGhost{position:fixed;z-index:20;pointer-events:none;opacity:.9;filter:drop-shadow(0 5px 10px #0009)}
 #dragGhost[hidden]{display:none}
 button:disabled{opacity:.35}
@@ -70,23 +70,21 @@ button:disabled{opacity:.35}
 <div class="hold-panel">
  <div class="hold-heading">📦 保留スペース　<span id="slotCount">1枠</span></div>
  <div id="holdSlots"></div>
- <div class="hold-caption">3000点獲得するごとに保留枠が1つ増えるよ！</div>
+ <div class="hold-caption">3000点ごとに保留枠が1つ増えるよ！</div>
 </div>
-<div class="controls">
- <button id="restartButton">🔄 もう一度遊ぶ</button>
-</div>
+<div class="controls"><button id="restartButton">🔄 もう一度遊ぶ</button></div>
 <p class="help">
 ブロックを盤面にドラッグして配置！<br>
-保留したいブロックは下の保留枠へドラッグ。<br>
-保留枠から盤面へドラッグすれば取り出せるよ。<br>
+保留枠へドラッグすると保管できるよ。<br>
+「手元に戻す」で手持ちに戻せるよ！<br>
 縦・横の列をそろえて消そう！
 </p>
 <div id="dragGhost" hidden></div>
 </main>
-
 <script>
 "use strict";
 
+const $=id=>document.getElementById(id);
 const SIZE=8;
 const COLORS=["#ff5277","#ffae42","#41d9ad","#42a5ff","#bd75ff","#ffe45e"];
 const SHAPES=[
@@ -98,8 +96,6 @@ const SHAPES=[
  [[0,0],[1,0],[2,0],[1,1],[1,2]],
  [[0,0],[1,0],[2,0],[2,1],[2,2]]
 ];
-
-const $=id=>document.getElementById(id);
 const emptyBoard=()=>Array.from({length:8},()=>Array(8).fill(null));
 const randomPiece=()=>({
  shape:SHAPES[Math.floor(Math.random()*SHAPES.length)].map(p=>[...p]),
@@ -117,26 +113,16 @@ const hasMove=(board,p)=>{
 
 let best=0;
 try{best=Number(localStorage.getItem("blockBlastBest"))||0}catch(e){}
-let state,selected=null,drag=null,preview=null,turnTimer=null,gameVersion=0;
+let state,selected=null,drag=null,previewTarget=null,turnTimer=null,gameVersion=0;
 
-const boardEl=$("board");
-const piecesEl=$("pieces");
-const slotsEl=$("holdSlots");
-const ghost=$("dragGhost");
-
+const boardEl=$("board"),piecesEl=$("pieces"),slotsEl=$("holdSlots"),ghost=$("dragGhost");
 const cells=Array.from({length:64},(_,i)=>{
  const el=document.createElement("button");
- el.type="button";
- el.className="cell";
- el.dataset.index=i;
- boardEl.append(el);
- return el;
+ el.type="button";el.className="cell";el.dataset.index=i;
+ boardEl.append(el);return el;
 });
 
-function maxSlots(){
- return Math.min(12,1+Math.floor(state.score/3000));
-}
-
+function maxSlots(){return Math.min(12,1+Math.floor(state.score/3000));}
 function message(t){$("message").textContent=t;}
 
 function makeShape(piece,size,gap=3){
@@ -149,9 +135,7 @@ function makeShape(piece,size,gap=3){
  for(let r=0;r<h;r++)for(let c=0;c<w;c++){
   const el=document.createElement("div");
   const active=piece.shape.some(([y,x])=>y===r&&x===c);
-  el.className="mini";
-  el.style.width=size+"px";
-  el.style.height=size+"px";
+  el.className="mini";el.style.width=size+"px";el.style.height=size+"px";
   if(active)el.style.background=piece.color;
   grid.append(el);
  }
@@ -166,13 +150,17 @@ function renderBoard(){
  });
 }
 
-function render(){
- renderBoard();
+function updateStats(){
  $("score").textContent=state.score;
  $("best").textContent=best;
  $("slotCount").textContent=maxSlots()+"枠";
+}
 
+function render(){
+ renderBoard();
+ updateStats();
  piecesEl.replaceChildren();
+
  state.hand.forEach((p,i)=>{
   const el=document.createElement("button");
   el.type="button";
@@ -189,6 +177,10 @@ function render(){
   piecesEl.append(el);
  });
 
+ renderHolds();
+}
+
+function renderHolds(){
  slotsEl.replaceChildren();
  for(let i=0;i<maxSlots();i++){
   const p=state.holds[i]||null;
@@ -196,46 +188,74 @@ function render(){
   el.className="hold-slot"+(p?" occupied":"")+
    (selected?.type==="hold"&&selected.index===i?" selected":"");
   el.dataset.slot=i;
+
   if(p){
-   el.append(makeShape(p,13,2));
-   el.addEventListener("pointerdown",e=>startDrag(e,{type:"hold",index:i}));
-   el.addEventListener("click",()=>{
-    if(state.busy||state.over)return;
-    selected={type:"hold",index:i};
-    render();
-    message("盤面にドラッグするか、枠を選択してね！");
+   const holder=document.createElement("div");
+   holder.append(makeShape(p,13,2));
+   holder.addEventListener("pointerdown",e=>startDrag(e,{type:"hold",index:i}));
+   el.append(holder);
+
+   const back=document.createElement("button");
+   back.type="button";
+   back.className="return-btn";
+   back.textContent="↩ 手元に戻す";
+   back.disabled=state.busy||state.over||!state.hand.some(x=>!x);
+   back.addEventListener("pointerdown",e=>e.stopPropagation());
+   back.addEventListener("click",e=>{
+    e.stopPropagation();
+    returnToHand(i);
    });
+   el.append(back);
   }else{
    el.textContent="＋";
    el.style.color="#91b8ed";
   }
   slotsEl.append(el);
  }
- $("restartButton").disabled=state.busy;
 }
 
 function addScore(n){
- const oldSlots=maxSlots();
+ const before=maxSlots();
  state.score+=n;
- const newSlots=maxSlots();
- if(newSlots>oldSlots){
-  message("🎉 保留スペースが "+newSlots+"枠に増えた！");
- }
+ const after=maxSlots();
+ updateStats();
+ if(after>before)message("🎉 保留スペースが "+after+"枠に増えた！");
  if(state.score>best){
   best=state.score;
   try{localStorage.setItem("blockBlastBest",String(best))}catch(e){}
  }
+ updateStats();
 }
 
+function getPiece(source){
+ return source.type==="hand"?state.hand[source.index]:state.holds[source.index];
+}
+function removePiece(source){
+ if(source.type==="hand")state.hand[source.index]=null;
+ else state.holds[source.index]=null;
+}
 function clearPreview(){
- preview=null;
+ previewTarget=null;
  renderBoard();
+}
+
+function findLines(board){
+ return {
+  rows:Array.from({length:8},(_,r)=>r).filter(r=>board[r].every(Boolean)),
+  cols:Array.from({length:8},(_,c)=>c).filter(c=>board.every(row=>row[c]))
+ };
+}
+function lineCells(lines){
+ return new Set([
+  ...lines.rows.flatMap(r=>Array.from({length:8},(_,c)=>r*8+c)),
+  ...lines.cols.flatMap(c=>Array.from({length:8},(_,r)=>r*8+c))
+ ]);
 }
 
 function showPreview(r,c,p){
  renderBoard();
  const valid=canPlace(state.board,p,r,c);
- preview={r,c,valid};
+ previewTarget={r,c,valid};
  p.shape.forEach(([dy,dx])=>{
   const y=r+dy,x=c+dx;
   if(y>=0&&y<8&&x>=0&&x<8){
@@ -247,38 +267,32 @@ function showPreview(r,c,p){
  if(valid){
   const copy=state.board.map(row=>[...row]);
   p.shape.forEach(([dy,dx])=>copy[r+dy][c+dx]=p.color);
-  const lines=findLines(copy);
-  lineCells(lines).forEach(i=>cells[i].classList.add("line-preview"));
+  lineCells(findLines(copy)).forEach(i=>cells[i].classList.add("line-preview"));
  }
 }
 
-function findLines(board){
- return {
-  rows:Array.from({length:8},(_,r)=>r).filter(r=>board[r].every(Boolean)),
-  cols:Array.from({length:8},(_,c)=>c).filter(c=>board.every(row=>row[c]))
- };
-}
-
-function lineCells(lines){
- return new Set([
-  ...lines.rows.flatMap(r=>Array.from({length:8},(_,c)=>r*8+c)),
-  ...lines.cols.flatMap(c=>Array.from({length:8},(_,r)=>r*8+c))
- ]);
-}
-
-function getPiece(source){
- return source.type==="hand"?state.hand[source.index]:state.holds[source.index];
-}
-
-function removePiece(source){
- if(source.type==="hand")state.hand[source.index]=null;
- else state.holds[source.index]=null;
+function burst(index,color){
+ const rect=cells[index].getBoundingClientRect();
+ for(let n=0;n<7;n++){
+  const particle=document.createElement("div");
+  particle.textContent=n%2?"✦":"•";
+  particle.style.cssText=`position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;z-index:30;pointer-events:none;color:${color||"#fff"};font-size:${12+Math.random()*13}px;text-shadow:0 0 12px white`;
+  document.body.append(particle);
+  const angle=Math.PI*2*n/7,distance=25+Math.random()*45;
+  const x=Math.cos(angle)*distance,y=Math.sin(angle)*distance;
+  const animation=particle.animate([
+   {transform:"translate(-50%,-50%) scale(.3)",opacity:1},
+   {transform:`translate(calc(-50% + ${x}px),calc(-50% + ${y}px)) scale(1.5)`,opacity:0}
+  ],{duration:650,easing:"cubic-bezier(.15,.7,.3,1)"});
+  animation.onfinish=()=>particle.remove();
+ }
 }
 
 function putInHold(piece,index,source){
  const old=state.holds[index]||null;
  if(source)removePiece(source);
  state.holds[index]=piece;
+
  if(old){
   if(source?.type==="hand")state.hand[source.index]=old;
   else if(source?.type==="hold")state.holds[source.index]=old;
@@ -292,6 +306,20 @@ function putInHold(piece,index,source){
  message("📦 保留スペースに入れたよ！");
 }
 
+function returnToHand(index){
+ if(state.busy||state.over)return;
+ const empty=state.hand.findIndex(x=>!x);
+ if(empty<0){
+  message("手持ちがいっぱい！先にブロックを置いてね。");
+  return;
+ }
+ state.hand[empty]=state.holds[index];
+ state.holds[index]=null;
+ selected=null;
+ render();
+ message("↩ ブロックを手元に戻したよ！");
+}
+
 function place(r,c,source){
  if(state.busy||state.over)return false;
  const p=getPiece(source);
@@ -300,9 +328,11 @@ function place(r,c,source){
   clearPreview();
   return false;
  }
+
  removePiece(source);
  selected=null;
  state.busy=true;
+
  const placed=p.shape.map(([dy,dx])=>(r+dy)*8+c+dx);
  p.shape.forEach(([dy,dx])=>state.board[r+dy][c+dx]=p.color);
  addScore(p.shape.length);
@@ -312,18 +342,19 @@ function place(r,c,source){
  const count=lines.rows.length+lines.cols.length;
  const oldBoard=state.board.map(row=>[...row]);
 
+ // 盤面のデータはここで確定。表示はアニメーション終了後に更新する。
  clearing.forEach(i=>state.board[Math.floor(i/8)][i%8]=null);
 
- // 消去演出用の光と粒子
  renderBoard();
  placed.forEach(i=>{
   cells[i].style.background=p.color;
   cells[i].classList.add("filled","placed");
  });
  clearing.forEach(i=>{
-  cells[i].style.background=oldBoard[Math.floor(i/8)][i%8];
+  const color=oldBoard[Math.floor(i/8)][i%8];
+  cells[i].style.background=color;
   cells[i].classList.add("filled","clearing");
-  burst(i,oldBoard[Math.floor(i/8)][i%8]);
+  burst(i,color);
  });
 
  if(count){
@@ -336,41 +367,14 @@ function place(r,c,source){
   message("✨ ナイス！");
  }
 
- render();
  const thisVersion=gameVersion;
  turnTimer=setTimeout(()=>{
   if(thisVersion!==gameVersion)return;
   turnTimer=null;
   boardEl.classList.remove("impact");
   finishTurn();
- },count?780:250);
+ },count?800:280);
  return true;
-}
-
-function burst(index,color){
- const rect=cells[index].getBoundingClientRect();
- for(let n=0;n<7;n++){
-  const particle=document.createElement("div");
-  particle.textContent=n%2?"✦":"•";
-  particle.style.position="fixed";
-  particle.style.left=(rect.left+rect.width/2)+"px";
-  particle.style.top=(rect.top+rect.height/2)+"px";
-  particle.style.zIndex="30";
-  particle.style.pointerEvents="none";
-  particle.style.color=color||"#fff";
-  particle.style.fontSize=(12+Math.random()*13)+"px";
-  particle.style.textShadow="0 0 12px white";
-  document.body.append(particle);
-  const angle=Math.PI*2*n/7;
-  const distance=25+Math.random()*45;
-  const x=Math.cos(angle)*distance;
-  const y=Math.sin(angle)*distance;
-  const animation=particle.animate([
-   {transform:"translate(-50%,-50%) scale(.3)",opacity:1},
-   {transform:`translate(calc(-50% + ${x}px),calc(-50% + ${y}px)) scale(1.5)`,opacity:0}
-  ],{duration:650,easing:"cubic-bezier(.15,.7,.3,1)"});
-  animation.onfinish=()=>particle.remove();
- }
 }
 
 function finishTurn(){
@@ -389,35 +393,47 @@ function startDrag(e,source){
  if(!p)return;
  e.preventDefault();
  selected=source;
- drag={source,piece:p,id:e.pointerId,startX:e.clientX,startY:e.clientY,moved:false};
+ drag={source,piece:p,id:e.pointerId,moved:false};
  render();
+}
+
+function boardPosition(x,y,p){
+ const first=cells[0].getBoundingClientRect();
+ const second=cells[1].getBoundingClientRect();
+ const pitch=second.left-first.left;
+ const h=Math.max(...p.shape.map(a=>a[0]))+1;
+ const w=Math.max(...p.shape.map(a=>a[1]))+1;
+ const width=w*pitch-(pitch-first.width);
+ const height=h*pitch-(pitch-first.height);
+
+ // 指の位置をブロック全体の中心として計算する
+ const left=x-width/2;
+ const top=y-height/2;
+ return {
+  r:Math.round((top-first.top)/pitch),
+  c:Math.round((left-first.left)/pitch),
+  left,top,width,height
+ };
 }
 
 function moveDrag(e){
  if(!drag||e.pointerId!==drag.id)return;
- const distance=Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY);
- if(distance<6&&!drag.moved)return;
- drag.moved=true;
+ e.preventDefault();
  const p=drag.piece;
- const h=Math.max(...p.shape.map(a=>a[0]))+1;
- const w=Math.max(...p.shape.map(a=>a[1]))+1;
- const cell=cells[0].getBoundingClientRect();
- const pitch=cells[1].getBoundingClientRect().left-cell.left;
- const width=w*pitch-(pitch-cell.width);
- const height=h*pitch-(pitch-cell.width);
- const left=e.clientX-width/2;
- const top=e.clientY-height-25;
- ghost.replaceChildren(makeShape(p,cell.width,pitch-cell.width));
- ghost.style.left=left+"px";
- ghost.style.top=top+"px";
+ drag.moved=true;
+ const pos=boardPosition(e.clientX,e.clientY,p);
+ const first=cells[0].getBoundingClientRect();
+ const second=cells[1].getBoundingClientRect();
+ const pitch=second.left-first.left;
+ ghost.replaceChildren(makeShape(p,first.width,pitch-first.width));
+ ghost.style.left=pos.left+"px";
+ ghost.style.top=pos.top+"px";
  ghost.hidden=false;
 
- const boardRect=boardEl.getBoundingClientRect();
- if(e.clientX>=boardRect.left-15&&e.clientX<=boardRect.right+15&&
-    e.clientY>=boardRect.top&&e.clientY<=boardRect.bottom+25){
-  const r=Math.round((top-cell.top)/pitch);
-  const c=Math.round((left-cell.left)/pitch);
-  showPreview(r,c,p);
+ const rect=boardEl.getBoundingClientRect();
+ if(e.clientX>=rect.left&&e.clientX<=rect.right&&
+    e.clientY>=rect.top&&e.clientY<=rect.bottom){
+  showPreview(pos.r,pos.c,p);
  }else{
   clearPreview();
  }
@@ -426,9 +442,11 @@ function moveDrag(e){
 function endDrag(e){
  if(!drag||e.pointerId!==drag.id)return;
  const current=drag;
- const moved=current.moved;
- const p=current.piece;
  const source=current.source;
+ const p=current.piece;
+ const moved=current.moved;
+ const x=e.clientX,y=e.clientY;
+
  ghost.hidden=true;
  drag=null;
  clearPreview();
@@ -439,55 +457,29 @@ function endDrag(e){
   return;
  }
 
- const target=document.elementFromPoint(e.clientX,e.clientY);
- const slot=target?.closest(".hold-slot");
- const boardRect=boardEl.getBoundingClientRect();
+ // elementFromPointに頼らず、各保留枠の実際の座標で判定する
+ const slots=[...slotsEl.querySelectorAll(".hold-slot")];
+ const slot=slots.find(el=>{
+  const r=el.getBoundingClientRect();
+  return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;
+ });
 
  if(slot){
   const index=Number(slot.dataset.slot);
-  if(index<maxSlots()){
-   putInHold(p,index,source);
-   return;
-  }
- }
-
- if(e.clientX>=boardRect.left&&e.clientX<=boardRect.right&&
-    e.clientY>=boardRect.top&&e.clientY<=boardRect.bottom){
-  const cell=cells[0].getBoundingClientRect();
-  const pitch=cells[1].getBoundingClientRect().left-cell.left;
-  const h=Math.max(...p.shape.map(a=>a[0]))+1;
-  const w=Math.max(...p.shape.map(a=>a[1]))+1;
-  const width=w*pitch-(pitch-cell.width);
-  const height=h*pitch-(pitch-cell.width);
-  const left=e.clientX-width/2;
-  const top=e.clientY-height-25;
-  const r=Math.round((top-cell.top)/pitch);
-  const c=Math.round((left-cell.left)/pitch);
-  place(r,c,source);
+  putInHold(p,index,source);
   return;
  }
+
+ const rect=boardEl.getBoundingClientRect();
+ if(x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom){
+  const pos=boardPosition(x,y,p);
+  place(pos.r,pos.c,source);
+  return;
+ }
+
  selected=source;
  render();
  message("盤面か保留枠の上で指を離してね！");
-}
-
-function restart(){
- gameVersion++;
- clearTimeout(turnTimer);
- turnTimer=null;
- ghost.hidden=true;
- drag=null;
- selected=null;
- state={
-  board:emptyBoard(),
-  score:0,
-  hand:[randomPiece(),randomPiece(),randomPiece()],
-  holds:Array(12).fill(null),
-  busy:false,
-  over:false
- };
- render();
- message("ブロックをドラッグして遊ぼう！");
 }
 
 window.addEventListener("pointermove",moveDrag,{passive:false});
@@ -510,6 +502,25 @@ boardEl.addEventListener("click",e=>{
  const i=Number(cell.dataset.index);
  place(Math.floor(i/8),i%8,selected);
 });
+
+function restart(){
+ gameVersion++;
+ clearTimeout(turnTimer);
+ turnTimer=null;
+ ghost.hidden=true;
+ drag=null;
+ selected=null;
+ state={
+  board:emptyBoard(),
+  score:0,
+  hand:[randomPiece(),randomPiece(),randomPiece()],
+  holds:Array(12).fill(null),
+  busy:false,
+  over:false
+ };
+ render();
+ message("ブロックをドラッグして遊ぼう！");
+}
 
 $("restartButton").addEventListener("click",restart);
 restart();
