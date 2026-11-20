@@ -7,7 +7,11 @@
 <title>BLOCK BLAST!</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:18px 12px 30px;min-height:100vh;background:radial-gradient(ellipse at top,#49318f,#211b58 55%,#101b3c);color:white;font-family:system-ui,sans-serif;text-align:center}
+body{
+ margin:0;padding:18px 12px 30px;min-height:100vh;
+ background:radial-gradient(ellipse at top,#49318f,#211b58 55%,#101b3c);
+ color:white;font-family:system-ui,sans-serif;text-align:center
+}
 main{max-width:480px;margin:auto}
 h1{font-size:clamp(28px,7vw,42px);margin:5px;text-shadow:0 0 20px #48cfff}
 .subtitle,.help{color:#cbd7fa;font-size:13px;line-height:1.7}
@@ -15,64 +19,141 @@ h1{font-size:clamp(28px,7vw,42px);margin:5px;text-shadow:0 0 20px #48cfff}
 .stat{min-width:125px;padding:8px 20px;border:1px solid #ffffff30;border-radius:14px;background:#ffffff12}
 .stat small{display:block;color:#cbd7fa}
 .stat strong{font-size:27px}
-#board{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;padding:7px;width:100%;aspect-ratio:1;background:#0b1230;border-radius:16px;box-shadow:0 12px 35px #0007;touch-action:none;user-select:none}
-.cell{padding:0;border:0;border-radius:5px;background:#ffffff12;min-width:0;min-height:0;position:relative;touch-action:none}
+
+#board{
+ display:grid;grid-template-columns:repeat(8,1fr);gap:4px;
+ padding:7px;width:100%;aspect-ratio:1;background:#0b1230;
+ border-radius:16px;box-shadow:0 12px 35px #0007;
+ touch-action:none;user-select:none
+}
+.cell{
+ padding:0;border:0;border-radius:5px;background:#ffffff12;
+ min-width:0;min-height:0;position:relative;touch-action:none;
+ overflow:visible
+}
 .cell.filled{box-shadow:inset 0 2px 3px #ffffff55,inset 0 -2px 3px #0003}
 .cell.preview{background:var(--piece)!important;opacity:.7;outline:2px solid white}
 .cell.invalid{background:#ff476e66!important;outline:2px solid #ff708a}
 .cell.line-preview{filter:brightness(1.7)}
 .cell.placed{animation:place .3s cubic-bezier(.2,1.7,.4,1)}
-.cell.clearing{z-index:3;animation:clear .75s ease-in forwards}
-.cell.clearing:after{content:"✦";position:absolute;inset:0;display:grid;place-items:center;color:white;font-size:22px;animation:star .65s ease-out}
-@keyframes place{0%{transform:scale(.3);filter:brightness(3)}70%{transform:scale(1.18)}100%{transform:scale(1)}}
-@keyframes clear{0%{transform:scale(1)}20%{transform:scale(1.2);filter:brightness(3);box-shadow:0 0 25px #fff,0 0 45px #ffe45e}55%{transform:scale(.9) rotate(12deg)}100%{transform:scale(.05) rotate(100deg);opacity:0}}
-@keyframes star{0%{transform:scale(.2);opacity:0}35%{transform:scale(1.8) rotate(90deg);opacity:1}100%{transform:scale(.1) rotate(180deg);opacity:0}}
+
+@keyframes place{
+ 0%{transform:scale(.3);filter:brightness(3)}
+ 70%{transform:scale(1.18)}
+ 100%{transform:scale(1)}
+}
+
+/* マス本体ではなく、上に重ねた演出だけを消す */
+.cell.clearing{z-index:3}
+.cell.clearing:before{
+ content:"";position:absolute;inset:0;border-radius:5px;
+ background:var(--clear-color);pointer-events:none;
+ animation:clear-overlay .75s ease-in forwards
+}
+.cell.clearing:after{
+ content:"✦";position:absolute;inset:0;display:grid;
+ place-items:center;color:white;font-size:22px;
+ pointer-events:none;animation:star .65s ease-out
+}
+@keyframes clear-overlay{
+ 0%{transform:scale(1);opacity:1}
+ 20%{transform:scale(1.2);filter:brightness(3);box-shadow:0 0 25px white}
+ 55%{transform:scale(.9) rotate(12deg)}
+ 100%{transform:scale(.05) rotate(100deg);opacity:0}
+}
+@keyframes star{
+ 0%{transform:scale(.2);opacity:0}
+ 35%{transform:scale(1.8) rotate(90deg);opacity:1}
+ 100%{transform:scale(.1) rotate(180deg);opacity:0}
+}
 #board.impact{animation:impact .38s ease-out}
-@keyframes impact{30%{filter:brightness(1.7);transform:scale(1.012)}100%{filter:brightness(1);transform:scale(1)}}
-#message{min-height:46px;display:grid;place-items:center;margin:8px 0;color:#ffe58a;font-size:14px}
+@keyframes impact{
+ 30%{filter:brightness(1.7);transform:scale(1.012)}
+ 100%{filter:brightness(1);transform:scale(1)}
+}
+
+#message{
+ min-height:46px;display:grid;place-items:center;
+ margin:8px 0;color:#ffe58a;font-size:14px
+}
 #pieces{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 14px}
-.piece{height:105px;display:flex;align-items:center;justify-content:center;padding:5px;border:2px solid #ffffff30;border-radius:14px;background:#ffffff10;touch-action:none;user-select:none;cursor:grab}
+.piece{
+ height:105px;display:flex;align-items:center;justify-content:center;
+ padding:5px;border:2px solid #ffffff30;border-radius:14px;
+ background:#ffffff10;touch-action:none;user-select:none;cursor:grab
+}
 .piece.selected{border-color:#a4eeff;background:#b1eaff25;box-shadow:0 0 16px #7edfff66}
 .piece.used{opacity:.18}
 .shape{display:grid;gap:3px;pointer-events:none}
 .mini{border-radius:4px;pointer-events:none}
-.hold-panel{padding:10px;border:1px solid #ffffff30;border-radius:14px;background:#ffffff10;margin-top:8px}
+
+.hold-panel{
+ padding:10px;border:1px solid #ffffff30;border-radius:14px;
+ background:#ffffff10;margin-top:8px
+}
 .hold-heading{font-weight:800;margin-bottom:8px}
 #holdSlots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.hold-slot{min-height:76px;border:2px dashed #ffffff55;border-radius:10px;background:#101b3c88;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;touch-action:none}
+.hold-slot{
+ min-height:76px;border:2px dashed #ffffff55;border-radius:10px;
+ background:#101b3c88;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;gap:5px;touch-action:none
+}
 .hold-slot.occupied{border-style:solid;border-color:#8ddcff;background:#ffffff16}
 .hold-slot.selected{outline:2px solid #ffe45e}
 .hold-slot .shape{gap:2px}
 .hold-slot .mini{width:13px!important;height:13px!important}
-.return-btn{border:0;border-radius:7px;background:#398bdc;color:white;font-size:10px;padding:4px 7px;cursor:pointer}
+.return-btn{
+ border:0;border-radius:7px;background:#398bdc;color:white;
+ font-size:10px;padding:4px 7px;cursor:pointer
+}
 .hold-caption{font-size:11px;color:#cbd7fa;margin-top:7px}
 .controls{display:flex;gap:10px;margin:14px 0}
-.controls button{flex:1;border:0;border-radius:12px;padding:13px 8px;color:white;background:linear-gradient(100deg,#2689ff,#8a5cff);font-size:15px;font-weight:700}
-#dragGhost{position:fixed;z-index:20;pointer-events:none;opacity:.9;filter:drop-shadow(0 5px 10px #0009)}
+.controls button{
+ flex:1;border:0;border-radius:12px;padding:13px 8px;color:white;
+ background:linear-gradient(100deg,#2689ff,#8a5cff);
+ font-size:15px;font-weight:700
+}
+#dragGhost{
+ position:fixed;z-index:20;pointer-events:none;opacity:.9;
+ filter:drop-shadow(0 5px 10px #0009)
+}
 #dragGhost[hidden]{display:none}
 button:disabled{opacity:.35}
 .help{margin:10px 0}
-@media(max-width:380px){#board{gap:3px;padding:6px}.piece{height:92px}#pieces{gap:7px}}
-@media(prefers-reduced-motion:reduce){*,*:after{animation-duration:.01ms!important}}
+@media(max-width:380px){
+ #board{gap:3px;padding:6px}
+ .piece{height:92px}
+ #pieces{gap:7px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:after{animation-duration:.01ms!important}
+}
 </style>
 </head>
 <body>
 <main>
 <h1>🧱 BLOCK BLAST!</h1>
 <div class="subtitle">ブロックをドラッグして配置しよう！</div>
+
 <div class="stats">
  <div class="stat"><small>SCORE</small><strong id="score">0</strong></div>
  <div class="stat"><small>BEST</small><strong id="best">0</strong></div>
 </div>
+
 <div id="board"></div>
 <div id="message" role="status">ブロックを置こう！</div>
 <div id="pieces"></div>
+
 <div class="hold-panel">
  <div class="hold-heading">📦 保留スペース　<span id="slotCount">1枠</span></div>
  <div id="holdSlots"></div>
  <div class="hold-caption">3000点ごとに保留枠が1つ増えるよ！</div>
 </div>
-<div class="controls"><button id="restartButton">🔄 もう一度遊ぶ</button></div>
+
+<div class="controls">
+ <button id="restartButton">🔄 もう一度遊ぶ</button>
+</div>
+
 <p class="help">
 ブロックを盤面にドラッグして配置！<br>
 保留枠へドラッグすると保管できるよ。<br>
@@ -81,29 +162,40 @@ button:disabled{opacity:.35}
 </p>
 <div id="dragGhost" hidden></div>
 </main>
+
 <script>
 "use strict";
 
 const $=id=>document.getElementById(id);
 const SIZE=8;
 const COLORS=["#ff5277","#ffae42","#41d9ad","#42a5ff","#bd75ff","#ffe45e"];
+
 const SHAPES=[
- [[0,0]],[[0,0],[0,1]],[[0,0],[0,1],[0,2]],
- [[0,0],[1,0],[1,1]],[[0,0],[1,0],[2,0],[2,1]],
- [[0,0],[1,0],[0,1],[1,1]],[[0,0],[0,1],[0,2],[1,1]],
- [[0,0],[1,0],[2,0]],[[0,0],[1,0],[2,0],[3,0]],
+ [[0,0]],
+ [[0,0],[0,1]],
+ [[0,0],[0,1],[0,2]],
+ [[0,0],[1,0],[1,1]],
+ [[0,0],[1,0],[2,0],[2,1]],
+ [[0,0],[1,0],[0,1],[1,1]],
+ [[0,0],[0,1],[0,2],[1,1]],
+ [[0,0],[1,0],[2,0]],
+ [[0,0],[1,0],[2,0],[3,0]],
  [[0,0],[0,1],[0,2],[0,3]],
  [[0,0],[1,0],[2,0],[1,1],[1,2]],
  [[0,0],[1,0],[2,0],[2,1],[2,2]]
 ];
+
 const emptyBoard=()=>Array.from({length:8},()=>Array(8).fill(null));
+
 const randomPiece=()=>({
  shape:SHAPES[Math.floor(Math.random()*SHAPES.length)].map(p=>[...p]),
  color:COLORS[Math.floor(Math.random()*COLORS.length)]
 });
+
 const canPlace=(board,p,r,c)=>!!p&&p.shape.every(([y,x])=>
  r+y>=0&&r+y<8&&c+x>=0&&c+x<8&&!board[r+y][c+x]
 );
+
 const hasMove=(board,p)=>{
  if(!p)return false;
  for(let r=0;r<8;r++)for(let c=0;c<8;c++)
@@ -113,29 +205,51 @@ const hasMove=(board,p)=>{
 
 let best=0;
 try{best=Number(localStorage.getItem("blockBlastBest"))||0}catch(e){}
-let state,selected=null,drag=null,previewTarget=null,turnTimer=null,gameVersion=0;
 
-const boardEl=$("board"),piecesEl=$("pieces"),slotsEl=$("holdSlots"),ghost=$("dragGhost");
+let state;
+let selected=null;
+let drag=null;
+let turnTimer=null;
+let gameVersion=0;
+
+const boardEl=$("board");
+const piecesEl=$("pieces");
+const slotsEl=$("holdSlots");
+const ghost=$("dragGhost");
+
 const cells=Array.from({length:64},(_,i)=>{
  const el=document.createElement("button");
- el.type="button";el.className="cell";el.dataset.index=i;
- boardEl.append(el);return el;
+ el.type="button";
+ el.className="cell";
+ el.dataset.index=i;
+ boardEl.append(el);
+ return el;
 });
 
-function maxSlots(){return Math.min(12,1+Math.floor(state.score/3000));}
-function message(t){$("message").textContent=t;}
+function maxSlots(){
+ return Math.min(12,1+Math.floor(state.score/3000));
+}
+
+function message(t){
+ $("message").textContent=t;
+}
 
 function makeShape(piece,size,gap=3){
  const grid=document.createElement("div");
  grid.className="shape";
+
  const h=Math.max(...piece.shape.map(p=>p[0]))+1;
  const w=Math.max(...piece.shape.map(p=>p[1]))+1;
+
  grid.style.gridTemplateColumns=`repeat(${w},${size}px)`;
  grid.style.gap=gap+"px";
+
  for(let r=0;r<h;r++)for(let c=0;c<w;c++){
   const el=document.createElement("div");
   const active=piece.shape.some(([y,x])=>y===r&&x===c);
-  el.className="mini";el.style.width=size+"px";el.style.height=size+"px";
+  el.className="mini";
+  el.style.width=size+"px";
+  el.style.height=size+"px";
   if(active)el.style.background=piece.color;
   grid.append(el);
  }
@@ -147,6 +261,7 @@ function renderBoard(){
   const color=state.board[Math.floor(i/8)][i%8];
   el.className="cell"+(color?" filled":"");
   el.style.background=color||"";
+  el.style.removeProperty("--clear-color");
  });
 }
 
@@ -164,9 +279,16 @@ function render(){
  state.hand.forEach((p,i)=>{
   const el=document.createElement("button");
   el.type="button";
-  el.className="piece"+(selected?.type==="hand"&&selected.index===i?" selected":"")+(!p?" used":"");
+  el.className="piece"+
+   (selected?.type==="hand"&&selected.index===i?" selected":"")+
+   (!p?" used":"");
+
   el.disabled=!p||state.busy||state.over;
-  if(p)el.append(makeShape(p,Math.min(19,Math.floor((piecesEl.clientWidth/3-24)/4))));
+
+  if(p){
+   el.append(makeShape(p,Math.min(19,Math.floor((piecesEl.clientWidth/3-24)/4))));
+  }
+
   el.addEventListener("pointerdown",e=>startDrag(e,{type:"hand",index:i}));
   el.addEventListener("click",()=>{
    if(!p||state.busy||state.over)return;
@@ -174,6 +296,7 @@ function render(){
    render();
    message("盤面に置くか、保留枠へドラッグしてね！");
   });
+
   piecesEl.append(el);
  });
 
@@ -182,11 +305,14 @@ function render(){
 
 function renderHolds(){
  slotsEl.replaceChildren();
+
  for(let i=0;i<maxSlots();i++){
   const p=state.holds[i]||null;
   const el=document.createElement("div");
+
   el.className="hold-slot"+(p?" occupied":"")+
    (selected?.type==="hold"&&selected.index===i?" selected":"");
+
   el.dataset.slot=i;
 
   if(p){
@@ -200,16 +326,19 @@ function renderHolds(){
    back.className="return-btn";
    back.textContent="↩ 手元に戻す";
    back.disabled=state.busy||state.over||!state.hand.some(x=>!x);
+
    back.addEventListener("pointerdown",e=>e.stopPropagation());
    back.addEventListener("click",e=>{
     e.stopPropagation();
     returnToHand(i);
    });
+
    el.append(back);
   }else{
    el.textContent="＋";
    el.style.color="#91b8ed";
   }
+
   slotsEl.append(el);
  }
 }
@@ -218,25 +347,29 @@ function addScore(n){
  const before=maxSlots();
  state.score+=n;
  const after=maxSlots();
+
  updateStats();
- if(after>before)message("🎉 保留スペースが "+after+"枠に増えた！");
+
+ if(after>before){
+  message("🎉 保留スペースが "+after+"枠に増えた！");
+ }
+
  if(state.score>best){
   best=state.score;
   try{localStorage.setItem("blockBlastBest",String(best))}catch(e){}
  }
+
  updateStats();
 }
 
 function getPiece(source){
- return source.type==="hand"?state.hand[source.index]:state.holds[source.index];
+ return source.type==="hand"?
+  state.hand[source.index]:state.holds[source.index];
 }
+
 function removePiece(source){
  if(source.type==="hand")state.hand[source.index]=null;
  else state.holds[source.index]=null;
-}
-function clearPreview(){
- previewTarget=null;
- renderBoard();
 }
 
 function findLines(board){
@@ -245,6 +378,7 @@ function findLines(board){
   cols:Array.from({length:8},(_,c)=>c).filter(c=>board.every(row=>row[c]))
  };
 }
+
 function lineCells(lines){
  return new Set([
   ...lines.rows.flatMap(r=>Array.from({length:8},(_,c)=>r*8+c)),
@@ -254,67 +388,98 @@ function lineCells(lines){
 
 function showPreview(r,c,p){
  renderBoard();
+
  const valid=canPlace(state.board,p,r,c);
- previewTarget={r,c,valid};
+
  p.shape.forEach(([dy,dx])=>{
   const y=r+dy,x=c+dx;
+
   if(y>=0&&y<8&&x>=0&&x<8){
    const el=cells[y*8+x];
    el.classList.add(valid?"preview":"invalid");
    el.style.setProperty("--piece",p.color);
   }
  });
+
  if(valid){
   const copy=state.board.map(row=>[...row]);
   p.shape.forEach(([dy,dx])=>copy[r+dy][c+dx]=p.color);
-  lineCells(findLines(copy)).forEach(i=>cells[i].classList.add("line-preview"));
+
+  lineCells(findLines(copy)).forEach(i=>
+   cells[i].classList.add("line-preview")
+  );
  }
+}
+
+function clearPreview(){
+ renderBoard();
 }
 
 function burst(index,color){
  const rect=cells[index].getBoundingClientRect();
+
  for(let n=0;n<7;n++){
   const particle=document.createElement("div");
   particle.textContent=n%2?"✦":"•";
-  particle.style.cssText=`position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;z-index:30;pointer-events:none;color:${color||"#fff"};font-size:${12+Math.random()*13}px;text-shadow:0 0 12px white`;
+
+  particle.style.cssText=
+   `position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;z-index:30;pointer-events:none;color:${color||"#fff"};font-size:${12+Math.random()*13}px;text-shadow:0 0 12px white`;
+
   document.body.append(particle);
-  const angle=Math.PI*2*n/7,distance=25+Math.random()*45;
-  const x=Math.cos(angle)*distance,y=Math.sin(angle)*distance;
+
+  const angle=Math.PI*2*n/7;
+  const distance=25+Math.random()*45;
+  const x=Math.cos(angle)*distance;
+  const y=Math.sin(angle)*distance;
+
   const animation=particle.animate([
    {transform:"translate(-50%,-50%) scale(.3)",opacity:1},
    {transform:`translate(calc(-50% + ${x}px),calc(-50% + ${y}px)) scale(1.5)`,opacity:0}
   ],{duration:650,easing:"cubic-bezier(.15,.7,.3,1)"});
+
   animation.onfinish=()=>particle.remove();
  }
 }
 
 function putInHold(piece,index,source){
  const old=state.holds[index]||null;
+
  if(source)removePiece(source);
+
  state.holds[index]=piece;
 
  if(old){
-  if(source?.type==="hand")state.hand[source.index]=old;
-  else if(source?.type==="hold")state.holds[source.index]=old;
-  else{
+  if(source?.type==="hand"){
+   state.hand[source.index]=old;
+  }else if(source?.type==="hold"){
+   state.holds[source.index]=old;
+  }else{
    const empty=state.hand.findIndex(x=>!x);
    if(empty>=0)state.hand[empty]=old;
   }
+ }else if(source?.type==="hand"){
+  // 手持ちの空いた場所に新しいブロックを補充
+  state.hand[source.index]=randomPiece();
  }
+
  selected=null;
  render();
- message("📦 保留スペースに入れたよ！");
+ message("📦 保留に入れたよ！新しいブロックが出たよ！");
 }
 
 function returnToHand(index){
  if(state.busy||state.over)return;
+
  const empty=state.hand.findIndex(x=>!x);
+
  if(empty<0){
   message("手持ちがいっぱい！先にブロックを置いてね。");
   return;
  }
+
  state.hand[empty]=state.holds[index];
  state.holds[index]=null;
+
  selected=null;
  render();
  message("↩ ブロックを手元に戻したよ！");
@@ -322,7 +487,9 @@ function returnToHand(index){
 
 function place(r,c,source){
  if(state.busy||state.over)return false;
+
  const p=getPiece(source);
+
  if(!p||!canPlace(state.board,p,r,c)){
   message("そこには置けないよ！");
   clearPreview();
@@ -334,7 +501,11 @@ function place(r,c,source){
  state.busy=true;
 
  const placed=p.shape.map(([dy,dx])=>(r+dy)*8+c+dx);
- p.shape.forEach(([dy,dx])=>state.board[r+dy][c+dx]=p.color);
+
+ p.shape.forEach(([dy,dx])=>{
+  state.board[r+dy][c+dx]=p.color;
+ });
+
  addScore(p.shape.length);
 
  const lines=findLines(state.board);
@@ -342,17 +513,25 @@ function place(r,c,source){
  const count=lines.rows.length+lines.cols.length;
  const oldBoard=state.board.map(row=>[...row]);
 
- // 盤面のデータはここで確定。表示はアニメーション終了後に更新する。
- clearing.forEach(i=>state.board[Math.floor(i/8)][i%8]=null);
+ // 消えるマスのデータを空にする
+ clearing.forEach(i=>{
+  state.board[Math.floor(i/8)][i%8]=null;
+ });
 
+ // まず通常の盤面を描画
  renderBoard();
+
+ // 置いたブロックのアニメーション
  placed.forEach(i=>{
   cells[i].style.background=p.color;
   cells[i].classList.add("filled","placed");
  });
+
+ // 消えるマスは背景を残し、上の演出だけをアニメーション
  clearing.forEach(i=>{
   const color=oldBoard[Math.floor(i/8)][i%8];
   cells[i].style.background=color;
+  cells[i].style.setProperty("--clear-color",color);
   cells[i].classList.add("filled","clearing");
   burst(i,color);
  });
@@ -361,6 +540,7 @@ function place(r,c,source){
   boardEl.classList.remove("impact");
   void boardEl.offsetWidth;
   boardEl.classList.add("impact");
+
   addScore(count*80);
   message("✨ "+count+"ライン消去！ +"+(p.shape.length+count*80)+"点");
  }else{
@@ -368,47 +548,71 @@ function place(r,c,source){
  }
 
  const thisVersion=gameVersion;
+
  turnTimer=setTimeout(()=>{
   if(thisVersion!==gameVersion)return;
+
   turnTimer=null;
   boardEl.classList.remove("impact");
+
+  // アニメーション終了後に通常の盤面へ戻す
   finishTurn();
  },count?800:280);
+
  return true;
 }
 
 function finishTurn(){
- if(state.hand.every(p=>!p))state.hand=[randomPiece(),randomPiece(),randomPiece()];
+ if(state.hand.every(p=>!p)){
+  state.hand=[randomPiece(),randomPiece(),randomPiece()];
+ }
+
  state.busy=false;
- state.over=!state.hand.some(p=>hasMove(state.board,p))&&
+
+ state.over=
+  !state.hand.some(p=>hasMove(state.board,p))&&
   !state.holds.slice(0,maxSlots()).some(p=>hasMove(state.board,p));
+
  render();
+
  if(state.over)message("ゲームオーバー！もう一度遊ぼう！");
  else message("次のブロックを置こう！");
 }
 
 function startDrag(e,source){
  if(e.button!==0||state.busy||state.over||drag)return;
+
  const p=getPiece(source);
  if(!p)return;
+
  e.preventDefault();
+
  selected=source;
- drag={source,piece:p,id:e.pointerId,moved:false};
- render();
+
+ drag={
+  source,
+  piece:p,
+  id:e.pointerId,
+  moved:false,
+  startX:e.clientX,
+  startY:e.clientY
+ };
 }
 
 function boardPosition(x,y,p){
  const first=cells[0].getBoundingClientRect();
  const second=cells[1].getBoundingClientRect();
  const pitch=second.left-first.left;
+
  const h=Math.max(...p.shape.map(a=>a[0]))+1;
  const w=Math.max(...p.shape.map(a=>a[1]))+1;
+
  const width=w*pitch-(pitch-first.width);
  const height=h*pitch-(pitch-first.height);
 
- // 指の位置をブロック全体の中心として計算する
  const left=x-width/2;
  const top=y-height/2;
+
  return {
   r:Math.round((top-first.top)/pitch),
   c:Math.round((left-first.left)/pitch),
@@ -418,19 +622,32 @@ function boardPosition(x,y,p){
 
 function moveDrag(e){
  if(!drag||e.pointerId!==drag.id)return;
+
  e.preventDefault();
- const p=drag.piece;
+
+ const distance=Math.hypot(
+  e.clientX-drag.startX,
+  e.clientY-drag.startY
+ );
+
+ if(distance<6)return;
+
  drag.moved=true;
+
+ const p=drag.piece;
  const pos=boardPosition(e.clientX,e.clientY,p);
+
  const first=cells[0].getBoundingClientRect();
  const second=cells[1].getBoundingClientRect();
  const pitch=second.left-first.left;
+
  ghost.replaceChildren(makeShape(p,first.width,pitch-first.width));
  ghost.style.left=pos.left+"px";
  ghost.style.top=pos.top+"px";
  ghost.hidden=false;
 
  const rect=boardEl.getBoundingClientRect();
+
  if(e.clientX>=rect.left&&e.clientX<=rect.right&&
     e.clientY>=rect.top&&e.clientY<=rect.bottom){
   showPreview(pos.r,pos.c,p);
@@ -441,6 +658,7 @@ function moveDrag(e){
 
 function endDrag(e){
  if(!drag||e.pointerId!==drag.id)return;
+
  const current=drag;
  const source=current.source;
  const p=current.piece;
@@ -457,8 +675,8 @@ function endDrag(e){
   return;
  }
 
- // elementFromPointに頼らず、各保留枠の実際の座標で判定する
  const slots=[...slotsEl.querySelectorAll(".hold-slot")];
+
  const slot=slots.find(el=>{
   const r=el.getBoundingClientRect();
   return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;
@@ -471,7 +689,9 @@ function endDrag(e){
  }
 
  const rect=boardEl.getBoundingClientRect();
- if(x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom){
+
+ if(x>=rect.left&&x<=rect.right&&
+    y>=rect.top&&y<=rect.bottom){
   const pos=boardPosition(x,y,p);
   place(pos.r,pos.c,source);
   return;
@@ -484,21 +704,36 @@ function endDrag(e){
 
 window.addEventListener("pointermove",moveDrag,{passive:false});
 window.addEventListener("pointerup",endDrag);
+
 window.addEventListener("pointercancel",()=>{
- if(drag){drag=null;ghost.hidden=true;clearPreview();render();}
+ if(drag){
+  drag=null;
+  ghost.hidden=true;
+  clearPreview();
+  render();
+ }
 });
+
 window.addEventListener("blur",()=>{
- if(drag){drag=null;ghost.hidden=true;clearPreview();render();}
+ if(drag){
+  drag=null;
+  ghost.hidden=true;
+  clearPreview();
+  render();
+ }
 });
 
 boardEl.addEventListener("click",e=>{
  if(state.busy||state.over)return;
+
  const cell=e.target.closest(".cell");
  if(!cell)return;
+
  if(!selected){
   message("先にブロックを選んでね！");
   return;
  }
+
  const i=Number(cell.dataset.index);
  place(Math.floor(i/8),i%8,selected);
 });
@@ -510,6 +745,7 @@ function restart(){
  ghost.hidden=true;
  drag=null;
  selected=null;
+
  state={
   board:emptyBoard(),
   score:0,
@@ -518,6 +754,7 @@ function restart(){
   busy:false,
   over:false
  };
+
  render();
  message("ブロックをドラッグして遊ぼう！");
 }
