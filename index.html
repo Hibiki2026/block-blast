@@ -15,8 +15,8 @@ body{
 main{max-width:480px;margin:auto}
 h1{font-size:clamp(28px,7vw,42px);margin:5px;text-shadow:0 0 20px #48cfff}
 .subtitle,.help{color:#cbd7fa;font-size:13px;line-height:1.7}
-.stats{display:flex;gap:12px;justify-content:center;margin:15px 0}
-.stat{min-width:125px;padding:8px 20px;border:1px solid #ffffff30;border-radius:14px;background:#ffffff12}
+.stats{display:flex;gap:12px;justify-content:center;margin:15px 0;flex-wrap:wrap}
+.stat{min-width:100px;padding:8px 15px;border:1px solid #ffffff30;border-radius:14px;background:#ffffff12}
 .stat small{display:block;color:#cbd7fa}
 .stat strong{font-size:27px}
 
@@ -24,36 +24,33 @@ h1{font-size:clamp(28px,7vw,42px);margin:5px;text-shadow:0 0 20px #48cfff}
  display:grid;
  grid-template-columns:repeat(8,minmax(0,1fr));
  grid-template-rows:repeat(8,minmax(0,1fr));
- grid-auto-rows:unset;
- gap:4px;
- padding:7px;
- width:100%;
- aspect-ratio:1 / 1;
- height:auto;
- background:#0b1230;
- border-radius:16px;
+ gap:4px;padding:7px;width:100%;
+ aspect-ratio:1 / 1;height:auto;
+ background:#0b1230;border-radius:16px;
  box-shadow:0 12px 35px #0007;
- touch-action:none;
- user-select:none;
+ touch-action:none;user-select:none
 }
 .cell{
- padding:0;border:0;border-radius:5px;background:#ffffff12;
- min-width:0;min-height:0;position:relative;touch-action:none;
- overflow:visible
+ padding:0;border:0;border-radius:5px;
+ background:#ffffff12;min-width:0;min-height:0;
+ position:relative;touch-action:none;overflow:visible
 }
 .cell.filled{box-shadow:inset 0 2px 3px #ffffff55,inset 0 -2px 3px #0003}
+.gem-mark{
+ position:absolute;inset:0;display:grid;place-items:center;
+ font-size:clamp(12px,2.5vw,22px);
+ filter:drop-shadow(0 0 5px #63eaff);
+ pointer-events:none;z-index:2
+}
 .cell.preview{background:var(--piece)!important;opacity:.7;outline:2px solid white}
 .cell.invalid{background:#ff476e66!important;outline:2px solid #ff708a}
 .cell.line-preview{filter:brightness(1.7)}
 .cell.placed{animation:place .3s cubic-bezier(.2,1.7,.4,1)}
-
 @keyframes place{
  0%{transform:scale(.3);filter:brightness(3)}
  70%{transform:scale(1.18)}
  100%{transform:scale(1)}
 }
-
-/* マス本体ではなく、上に重ねた演出だけを消す */
 .cell.clearing{z-index:3}
 .cell.clearing:before{
  content:"";position:absolute;inset:0;border-radius:5px;
@@ -123,6 +120,7 @@ h1{font-size:clamp(28px,7vw,42px);margin:5px;text-shadow:0 0 20px #48cfff}
  background:linear-gradient(100deg,#2689ff,#8a5cff);
  font-size:15px;font-weight:700
 }
+#menuButton{background:linear-gradient(100deg,#59677d,#39445d)!important}
 #dragGhost{
  position:fixed;z-index:20;pointer-events:none;opacity:.9;
  filter:drop-shadow(0 5px 10px #0009)
@@ -130,6 +128,26 @@ h1{font-size:clamp(28px,7vw,42px);margin:5px;text-shadow:0 0 20px #48cfff}
 #dragGhost[hidden]{display:none}
 button:disabled{opacity:.35}
 .help{margin:10px 0}
+
+.menu{
+ max-width:480px;margin:22px auto;padding:22px;
+ border:1px solid #ffffff35;border-radius:20px;
+ background:#ffffff12;box-shadow:0 12px 35px #0005
+}
+.menu h2{margin:0 0 8px;font-size:25px}
+.menu p{color:#d8dcff;font-size:13px}
+.mode-button{
+ display:block;width:100%;margin:12px 0;padding:17px;
+ border:2px solid #ffffff35;border-radius:14px;
+ background:#ffffff14;color:white;font-size:18px;font-weight:800
+}
+.mode-button small{
+ display:block;font-size:12px;font-weight:500;
+ margin-top:5px;color:#dce5ff
+}
+#gemStat,.stage-info{display:none}
+.stage-info{color:#8ff4ff;font-weight:800;margin:-5px 0 8px}
+
 @media(max-width:380px){
  #board{gap:3px;padding:6px}
  .piece{height:92px}
@@ -142,12 +160,31 @@ button:disabled{opacity:.35}
 </head>
 <body>
 <main>
+
+<section id="modeMenu" class="menu">
+ <h2>🧱 BLOCK BLAST!</h2>
+ <p>遊ぶモードを選んでね！</p>
+ <button class="mode-button" id="classicMode">
+  🎮 通常モード
+  <small>いつものスコアアタック</small>
+ </button>
+ <button class="mode-button" id="gemMode">
+  💎 宝石集めモード
+  <small>宝石を集めてステージクリア！</small>
+ </button>
+</section>
+
+<div id="gameArea" style="display:none">
 <h1>🧱 BLOCK BLAST!</h1>
-<div class="subtitle">ブロックをドラッグして配置しよう！</div>
+<div class="subtitle" id="modeSubtitle">ブロックをドラッグして配置しよう！</div>
+<div class="stage-info" id="stageInfo"></div>
 
 <div class="stats">
  <div class="stat"><small>SCORE</small><strong id="score">0</strong></div>
  <div class="stat"><small>BEST</small><strong id="best">0</strong></div>
+ <div class="stat" id="gemStat">
+  <small>💎 宝石</small><strong id="gemCount">0 / 5</strong>
+ </div>
 </div>
 
 <div id="board"></div>
@@ -162,6 +199,7 @@ button:disabled{opacity:.35}
 
 <div class="controls">
  <button id="restartButton">🔄 もう一度遊ぶ</button>
+ <button id="menuButton">🏠 モード選択</button>
 </div>
 
 <p class="help">
@@ -171,13 +209,13 @@ button:disabled{opacity:.35}
 縦・横の列をそろえて消そう！
 </p>
 <div id="dragGhost" hidden></div>
+</div>
 </main>
 
 <script>
 "use strict";
 
 const $=id=>document.getElementById(id);
-const SIZE=8;
 const COLORS=["#ff5277","#ffae42","#41d9ad","#42a5ff","#bd75ff","#ffe45e"];
 
 const SHAPES=[
@@ -221,6 +259,11 @@ let selected=null;
 let drag=null;
 let turnTimer=null;
 let gameVersion=0;
+
+let currentMode="classic";
+let stage=1;
+let collectedGems=0;
+let gemGoal=5;
 
 const boardEl=$("board");
 const piecesEl=$("pieces");
@@ -268,11 +311,86 @@ function makeShape(piece,size,gap=3){
 
 function renderBoard(){
  cells.forEach((el,i)=>{
-  const color=state.board[Math.floor(i/8)][i%8];
+  const r=Math.floor(i/8),c=i%8;
+  const color=state.board[r][c];
+
   el.className="cell"+(color?" filled":"");
   el.style.background=color||"";
   el.style.removeProperty("--clear-color");
+  el.replaceChildren();
+
+  if(currentMode==="gems"&&state.gems?.[r]?.[c]){
+   const mark=document.createElement("span");
+   mark.className="gem-mark";
+   mark.textContent="💎";
+   el.append(mark);
+  }
  });
+ updateGemDisplay();
+}
+
+function updateGemDisplay(){
+ const stat=$("gemStat");
+ const info=$("stageInfo");
+
+ if(currentMode==="gems"){
+  stat.style.display="block";
+  info.style.display="block";
+  $("gemCount").textContent=collectedGems+" / "+gemGoal;
+  info.textContent="💎 STAGE "+stage+"　あと "+(gemGoal-collectedGems)+" 個でクリア！";
+ }else{
+  stat.style.display="none";
+  info.style.display="none";
+ }
+}
+
+function spawnGems(amount){
+ const spots=[];
+
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+  if(!state.board[r][c])spots.push([r,c]);
+ }
+
+ for(let i=spots.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [spots[i],spots[j]]=[spots[j],spots[i]];
+ }
+
+ spots.slice(0,Math.min(amount,spots.length)).forEach(([r,c])=>{
+  state.gems[r][c]=true;
+ });
+}
+
+function collectGems(clearing){
+ if(currentMode!=="gems")return 0;
+
+ let found=0;
+
+ clearing.forEach(i=>{
+  const r=Math.floor(i/8),c=i%8;
+
+  if(state.gems[r][c]){
+   state.gems[r][c]=false;
+   found++;
+   burst(i,"#72f4ff");
+  }
+ });
+
+ if(found){
+  collectedGems+=found;
+
+  while(collectedGems>=gemGoal){
+   collectedGems-=gemGoal;
+   stage++;
+   gemGoal=5+(stage-1)*2;
+   spawnGems(gemGoal);
+   message("🎉 STAGE "+(stage-1)+" クリア！次のステージへ！");
+  }
+
+  updateGemDisplay();
+ }
+
+ return found;
 }
 
 function updateStats(){
@@ -289,6 +407,7 @@ function render(){
  state.hand.forEach((p,i)=>{
   const el=document.createElement("button");
   el.type="button";
+
   el.className="piece"+
    (selected?.type==="hand"&&selected.index===i?" selected":"")+
    (!p?" used":"");
@@ -300,6 +419,7 @@ function render(){
   }
 
   el.addEventListener("pointerdown",e=>startDrag(e,{type:"hand",index:i}));
+
   el.addEventListener("click",()=>{
    if(!p||state.busy||state.over)return;
    selected={type:"hand",index:i};
@@ -413,6 +533,7 @@ function showPreview(r,c,p){
 
  if(valid){
   const copy=state.board.map(row=>[...row]);
+
   p.shape.forEach(([dy,dx])=>copy[r+dy][c+dx]=p.color);
 
   lineCells(findLines(copy)).forEach(i=>
@@ -468,7 +589,6 @@ function putInHold(piece,index,source){
    if(empty>=0)state.hand[empty]=old;
   }
  }else if(source?.type==="hand"){
-  // 手持ちの空いた場所に新しいブロックを補充
   state.hand[source.index]=randomPiece();
  }
 
@@ -523,21 +643,19 @@ function place(r,c,source){
  const count=lines.rows.length+lines.cols.length;
  const oldBoard=state.board.map(row=>[...row]);
 
- // 消えるマスのデータを空にする
+ const gemsFound=collectGems(clearing);
+
  clearing.forEach(i=>{
   state.board[Math.floor(i/8)][i%8]=null;
  });
 
- // まず通常の盤面を描画
  renderBoard();
 
- // 置いたブロックのアニメーション
  placed.forEach(i=>{
   cells[i].style.background=p.color;
   cells[i].classList.add("filled","placed");
  });
 
- // 消えるマスは背景を残し、上の演出だけをアニメーション
  clearing.forEach(i=>{
   const color=oldBoard[Math.floor(i/8)][i%8];
   cells[i].style.background=color;
@@ -552,7 +670,7 @@ function place(r,c,source){
   boardEl.classList.add("impact");
 
   addScore(count*80);
-  message("✨ "+count+"ライン消去！ +"+(p.shape.length+count*80)+"点");
+  message("✨ "+count+"ライン消去！ +"+(p.shape.length+count*80)+"点"+(gemsFound?"　💎 +"+gemsFound:""));
  }else{
   message("✨ ナイス！");
  }
@@ -564,8 +682,6 @@ function place(r,c,source){
 
   turnTimer=null;
   boardEl.classList.remove("impact");
-
-  // アニメーション終了後に通常の盤面へ戻す
   finishTurn();
  },count?800:280);
 
@@ -758,6 +874,7 @@ function restart(){
 
  state={
   board:emptyBoard(),
+  gems:Array.from({length:8},()=>Array(8).fill(false)),
   score:0,
   hand:[randomPiece(),randomPiece(),randomPiece()],
   holds:Array(12).fill(null),
@@ -765,12 +882,43 @@ function restart(){
   over:false
  };
 
+ if(currentMode==="gems")spawnGems(gemGoal);
+
  render();
- message("ブロックをドラッグして遊ぼう！");
+
+ message(currentMode==="gems"
+  ?"💎 宝石を含む列を消して集めよう！"
+  :"ブロックをドラッグして遊ぼう！");
 }
 
+function startMode(mode){
+ currentMode=mode;
+ stage=1;
+ collectedGems=0;
+ gemGoal=5;
+
+ $("modeMenu").style.display="none";
+ $("gameArea").style.display="block";
+
+ $("modeSubtitle").textContent=mode==="gems"
+  ?"💎 宝石のある列を消して集めよう！"
+  :"ブロックをドラッグして配置しよう！";
+
+ restart();
+}
+
+function showModeMenu(){
+ gameVersion++;
+ clearTimeout(turnTimer);
+ turnTimer=null;
+ $("gameArea").style.display="none";
+ $("modeMenu").style.display="block";
+}
+
+$("classicMode").addEventListener("click",()=>startMode("classic"));
+$("gemMode").addEventListener("click",()=>startMode("gems"));
 $("restartButton").addEventListener("click",restart);
-restart();
+$("menuButton").addEventListener("click",showModeMenu);
 </script>
 </body>
 </html>
